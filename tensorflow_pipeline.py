@@ -3,8 +3,27 @@ import numpy as np
 import tensorflow as tf
 from utils.cka_formating import compute_cka_matrix_tensorflow
 from utils.save_results import save_cka, save_metadata, save_metrics, save_predictions, save_model_structure_tf
+from utils.preprocessing import preprocess_base
 
-def run_tensorflow(save_path, max_samples=992):
+def preprocess_tf(image):
+    x = preprocess_base(image)
+    return tf.constant(x)  # stays HWC
+
+
+# def run_tensorflow(model, x):
+#     # Case 1: Keras model
+#     if hasattr(model, "predict"):
+#         return model(x)
+
+#     # Case 2: SavedModel (converted)
+#     infer = model.signatures["serving_default"]
+#     out = infer(**{list(infer.structured_input_signature[1].keys())[0]: x})
+#     return list(out.values())[0]
+
+def create_tensorflow_model():
+    return tf.keras.applications.ResNet50(weights="imagenet")
+
+def run_tensorflow(model, save_path, max_samples=992):
     print("RUNNING TENSORFLOW PIPELINE WITH " + str(max_samples) + " SAMPLES.")
     batch_size = 32
     batches = max_samples // batch_size
@@ -13,7 +32,7 @@ def run_tensorflow(save_path, max_samples=992):
     print("Expected samples:", batches * batch_size)
 
     # download model
-    model = tf.keras.applications.ResNet50(weights="imagenet")
+    # model = tf.keras.applications.ResNet50(weights="imagenet")
     preprocess = tf.keras.applications.resnet.preprocess_input
 
     # get and prepare dataset
@@ -136,3 +155,6 @@ def run_tensorflow(save_path, max_samples=992):
         "trainable_params": int(trainable_params)
     }
     save_metadata(metadata, save_path)
+
+def save_outputs():
+    return None
