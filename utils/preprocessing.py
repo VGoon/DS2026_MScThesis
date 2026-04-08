@@ -1,10 +1,24 @@
 from PIL import Image
 import numpy as np
 import torch
+import tensorflow as tf
 
 def preprocess_pt(image):
     x = preprocess_base(image)
     return torch.tensor(x, dtype=torch.float32).permute(2, 0, 1)  # HWC → CHW
+
+def preprocess_tf(image):
+    return preprocess_base_tf(image) # stays HWC
+    # return x  
+
+def preprocess_base_tf(image):
+    image = tf.cast(image, tf.float32) / 255.0
+
+    mean = tf.constant([0.485, 0.456, 0.406])
+    std = tf.constant([0.229, 0.224, 0.225])
+
+    image = (image - mean) / std
+    return image
 
 def preprocess_base(image):
     # Resize (shorter side = 256)

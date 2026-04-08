@@ -12,19 +12,19 @@ def clean_hooks(handles):
         h.remove()
 
 def create_pytorch_model():
-    print("CREATING PYTORCH MODEL.")
+    print("PY: CREATING MODEL.")
     weights = models.ResNet18_Weights.DEFAULT
     model = models.resnet18(weights=weights)
     model.eval()
     return model
 
 def get_dataloader(path, preprocess_fn):
-    print("GETTING DATA LOADER.")
+    print("PY: GETTING DATA LOADER.")
     dataset = datasets.ImageFolder(path, transform=preprocess_fn)
     return DataLoader(dataset, batch_size=32, shuffle=False, num_workers=0)
 
 def run_inference_pytorch(model, loader, max_samples = 992):
-    print("RUNNING PYTORCH INFERENCE WITH " + str(max_samples) + " SAMPLES.")
+    print("PY: RUNNING PYTORCH INFERENCE WITH " + str(max_samples) + " SAMPLES.")
     # add hooks
     activations = {}
     handles = []
@@ -72,7 +72,7 @@ def run_inference_pytorch(model, loader, max_samples = 992):
     return all_outputs, all_labels, activations, processing_time
 
 def run_cka_pytorch(activations):
-    print("RUNNING CKA.")
+    print("PY: RUNNING CKA.")
     cka_start_time = time.time()
     cka_matrix, layers = compute_cka_matrix_pytorch(activations)
     cka_end_time = time.time()
@@ -82,7 +82,7 @@ def run_cka_pytorch(activations):
     return cka_matrix, layers, duration
 
 def save_outputs_pytorch(model, save_path, all_outputs, all_labels, cka_matrix, layer_names, version_name, metadata):
-    print("SAVING PYTORCH METRICS.")
+    print("PY: SAVING METRICS.")
     
     # SAVE MODEL STATE
     save_model_state_pytorch(model, save_path)

@@ -1,0 +1,10 @@
+{
+    "model": "ResNet18",
+    "framework": "PyTorch",
+    "type": "baseline",
+    "samples": 992,
+    "inference_time": 208.49506521224976,
+    "cka_time": 8.183687210083008,
+    "total_params": 25636712,
+    "trainable_params": 25583592
+}
