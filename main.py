@@ -11,12 +11,14 @@ from utils.save_results import save_cka
 print("START")
 
 framework = "tensorflow"  # or "tensorflow"
-dataset_path = "ImageNet/"
+dataset_path = "ImageNetSmall/"
 
-base_dir = f"results/{framework}"
+base_dir = f"results/"
 run_path = get_next_run_path(base_dir)
 max_samples = 992 #(31) 3264 or 
 batch_size = 32
+
+print("was able to run main.")
 
 def create_subdirectories(run_path, baseline_name, converted_name):
     save_path_base = os.path.join(run_path, baseline_name)
@@ -102,7 +104,7 @@ def run():
     save_cka(cka_matrix, stages, run_path, "PT_vs_TF")
     # save_cka(cka_matrix, layer_names, save_path, framework):
 
-run()
+# run()
 
 # PREPROCESS_CONFIG = {
 #     "resize": 256,

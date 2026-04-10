@@ -2,3 +2,5 @@
 /.vscode
 /__pycache__
 /ignore
+/ImageNetSmall
+imagenet_subset.tar
