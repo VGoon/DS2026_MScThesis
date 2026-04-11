@@ -19,17 +19,12 @@ def create_pytorch_model():
     model.eval()
     return model
 
+# def is_valid_file(path):
+#     return not os.path.basename(path).startswith("._")
+
 def get_dataloader(path, preprocess_fn):
     print("PY: GETTING DATA LOADER.")
-
-    def is_valid_file(file_path):
-        return not os.path.basename(file_path).startswith("._")
-
-    dataset = datasets.ImageFolder(
-        path,
-        transform=preprocess_fn,
-        is_valid_file=is_valid_file
-    )
+    dataset = datasets.ImageFolder(path, transform=preprocess_fn)
     return DataLoader(dataset, batch_size=32, shuffle=False, num_workers=0)
 
 def run_inference_pytorch(model, loader, max_samples = 992):
