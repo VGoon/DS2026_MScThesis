@@ -28,7 +28,7 @@ drive.mount('/content/drive')
 
 !cp /content/drive/MyDrive/imagenet/imagenet_subset.tar /content/
 
-!tar -xf imagenet_subset.tar -C /content/
+!tar -xf imagenet_subset.tar -C /content/ImageNetSmall/
 
 
 !git clone https://github.com/your-username/your-repo.git

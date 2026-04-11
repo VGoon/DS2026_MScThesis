@@ -11,7 +11,7 @@ from utils.save_results import save_cka
 print("START")
 
 framework = "tensorflow"  # or "tensorflow"
-dataset_path = "ImageNetSmall/"
+dataset_path = "dataset/"
 
 base_dir = f"results/"
 run_path = get_next_run_path(base_dir)

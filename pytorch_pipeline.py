@@ -2,8 +2,9 @@ import torch
 from torchvision import datasets, models
 from torch.utils.data import DataLoader
 import time
+import os
 from utils.save_results import save_metadata, save_cka, save_metrics, save_predictions, save_model_state_pytorch, save_model_structure_pytorch
-from utils.cka_formating import get_activation_pytorch #, compute_cka_matrix_pytorch
+from utils.cka_formating import get_activation_pytorch , compute_cka_matrix_pytorch
 from torchvision import transforms
 
 def clean_hooks(handles):
@@ -20,7 +21,15 @@ def create_pytorch_model():
 
 def get_dataloader(path, preprocess_fn):
     print("PY: GETTING DATA LOADER.")
-    dataset = datasets.ImageFolder(path, transform=preprocess_fn)
+
+    def is_valid_file(file_path):
+        return not os.path.basename(file_path).startswith("._")
+
+    dataset = datasets.ImageFolder(
+        path,
+        transform=preprocess_fn,
+        is_valid_file=is_valid_file
+    )
     return DataLoader(dataset, batch_size=32, shuffle=False, num_workers=0)
 
 def run_inference_pytorch(model, loader, max_samples = 992):
