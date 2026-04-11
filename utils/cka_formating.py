@@ -1,9 +1,22 @@
 import numpy as np
 from CKA import linear_CKA
 
+# def get_activation_pytorch(name, activations):
+#     def hook(module, input, output):
+#         activations.setdefault(name, []).append(output.detach())
+#     return hook
 def get_activation_pytorch(name, activations):
-    def hook(module, input, output):
-        activations.setdefault(name, []).append(output.detach())
+    def hook(model, input, output):
+        # ✅ Global average pooling FIRST
+        act = output.mean(dim=[2, 3])  # (B, C, H, W) → (B, C)
+
+        # ✅ Move to CPU immediately (important)
+        act = act.detach().cpu()
+
+        if name not in activations:
+            activations[name] = []
+
+        activations[name].append(act)
     return hook
 
 def reshape_for_cka_pytorch(tensor):
@@ -16,9 +29,10 @@ def compute_cka_matrix_pytorch(activations_dict):
     
     cka_matrix = np.zeros((n, n))
 
-    reshaped = {}
-    for k, v in activations_dict.items():
-        reshaped[k] = reshape_for_cka_pytorch(v)
+    reshaped = activations_dict
+    # reshaped = {}
+    # for k, v in activations_dict.items():
+        # reshaped[k] = reshape_for_cka_pytorch(v)
 
     for i in range(n):
         for j in range(n):
@@ -44,9 +58,10 @@ def compute_cka_matrix_tensorflow(activations_dict):
     
     cka_matrix = np.zeros((n, n))
 
-    reshaped = {}
-    for k, v in activations_dict.items():
-        reshaped[k] = reshape_for_cka_tensorflow(v)
+    reshaped = activations_dict
+    # reshaped = {}
+    # for k, v in activations_dict.items():
+    #     reshaped[k] = reshape_for_cka_tensorflow(v)
 
     for i in range(n):
         for j in range(n):
@@ -83,9 +98,10 @@ def compute_cka_matrix(activations_dict):
 
     cka_matrix = np.zeros((n, n))
 
-    reshaped = {}
-    for k, v in activations_dict.items():
-        reshaped[k] = reshape_for_cka(v)
+    reshaped = activations_dict
+    # reshaped = {}
+    # for k, v in activations_dict.items():
+    #     reshaped[k] = reshape_for_cka(v)
 
     for i in range(n):
         for j in range(n):
@@ -108,6 +124,8 @@ def compute_cross_cka(pt_activations, tf_activations):
         for j, t in enumerate(stages):
             X = reshape_for_cka(pt_activations[p])
             Y = reshape_for_cka(tf_activations[t])
+            # X = reshape_for_cka(pt_activations[p])
+            # Y = reshape_for_cka(tf_activations[t])
 
             if X.shape[0] != Y.shape[0]:
                 cka_matrix[i, j] = np.nan

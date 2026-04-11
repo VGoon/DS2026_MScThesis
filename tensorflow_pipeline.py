@@ -55,7 +55,9 @@ def run_inference_tensorflow(model, data, max_samples = 992):
             layer_outputs = activation_model(images)  # list of tensors
 
             for (stage, _), act in zip(tf_layer_map.items(), layer_outputs):
+                act = tf.reduce_mean(act, axis=[1, 2])
                 activations[stage].append(act.numpy())
+                # activations[stage].append(act.numpy())
 
         if is_keras:
             preds = model(images)
