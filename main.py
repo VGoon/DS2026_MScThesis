@@ -104,7 +104,7 @@ def run():
     save_cka(cka_matrix, stages, run_path, "PT_vs_TF")
     # save_cka(cka_matrix, layer_names, save_path, framework):
 
-# run()
+run()
 
 # PREPROCESS_CONFIG = {
 #     "resize": 256,
