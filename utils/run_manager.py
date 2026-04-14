@@ -23,4 +23,4 @@ def get_next_run_path(base_dir):
     run_path = os.path.join(base_dir, f"Run_{next_run}")
     os.makedirs(run_path)
 
-    return run_path
+    return run_path, f"Run_{next_run}/"

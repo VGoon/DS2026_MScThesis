@@ -1,17 +1,8 @@
 import os
 import json
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
-
-# metrics example usage
-# metrics = {
-#     "top1": float(top1_acc),
-#     "top5": float(top5_acc),
-#     "top10": float(top10_acc)
-# }
-
-# save_metrics(metrics, "results/resnet_tf/")
 
 def save_metrics(metrics_dict, save_path):
     os.makedirs(save_path, exist_ok=True)
@@ -19,17 +10,6 @@ def save_metrics(metrics_dict, save_path):
     with open(os.path.join(save_path, "metrics.json"), "w") as f:
         json.dump(metrics_dict, f, indent=4)
 
-
-# save_predictions(
-#     top1,
-#     top5,
-#     top10,
-#     top1_conf,
-#     top5_conf,
-#     top10_conf,
-#     all_labels,  
-#     "results/resnet50_tf_3264/"
-# )
 def save_predictions(top1, top5, top10,
                      top1_conf, top5_conf, top10_conf, 
                      all_labels, save_path):
@@ -47,11 +27,6 @@ def save_predictions(top1, top5, top10,
     np.save(os.path.join(save_path, "top10_conf.npy"), top10_conf)
 
     np.save(os.path.join(save_path, "labels.npy"), all_labels)
-
-# top1, top5, top10
-# confidence - mean top1 summary
-# cka matrix
-# layer names
 
 def save_cka(cka_matrix, layer_names, save_path, framework):
     os.makedirs(save_path, exist_ok=True)
@@ -72,16 +47,7 @@ def save_cka(cka_matrix, layer_names, save_path, framework):
     plt.title("CKA Similarity Between Layers - " + framework)
     plt.tight_layout()
     plt.savefig(os.path.join(save_path, "cka_heatmap_"+framework+".png"), dpi=300)
-    # plt.show()
 
-
-# metadata = {
-#     "model": "ResNet50",
-#     "framework": "TensorFlow",
-#     "samples": 3264,
-#     "inference_time": float(infer_time),
-#     "cka_time": float(cka_time)
-# }
 def save_metadata(metadata_dict, save_path):
     with open(os.path.join(save_path, "metadata.json"), "w") as f:
         json.dump(metadata_dict, f, indent=4)

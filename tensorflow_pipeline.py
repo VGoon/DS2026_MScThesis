@@ -1,71 +1,74 @@
 import time
 import numpy as np
 import tensorflow as tf
-from utils.cka_formating import compute_cka_matrix_tensorflow
+from utils.preprocessing import preprocess_tf_mobilenet, preprocess_tf
 from utils.save_results import save_cka, save_metadata, save_metrics, save_predictions, save_model_structure_tf
 
-def create_tensorflow_model():
-    print("TF: CREATING MODEL.")
-    return tf.keras.applications.ResNet50(weights="imagenet")
+def create_resnet50():
+    print("TF: CREATING ResNet50 MODEL.")
+    return tf.keras.applications.ResNet50(
+        input_shape=(224, 224, 3),
+        weights="imagenet"
+    )
 
-def get_data_tf(path, preprocess_fn, max_samples, batch_size):
-    print("TF: GETTING DATA.")
+def create_mobilenetv2():
+    print("TF: CREATING MobileNetV2 MODEL.")
+    return tf.keras.applications.MobileNetV2(
+        input_shape=(224, 224, 3),
+        weights='imagenet'
+    )
+
+def create_vgg16():
+    print("TF: CREATING VGG16 MODEL.")
+    return tf.keras.applications.VGG16(
+        input_shape=(224, 224, 3),
+        weights="imagenet"
+    )
+
+def get_data(path, preprocess_fn, max_samples, batch_size, model_type, debugging):
     batches = max_samples // batch_size
-
+    print("TF: GETTING DATA.")
     print("Batches:", batches)
     print("Expected samples:", batches * batch_size)
 
     # get and prepare dataset
     dataset = tf.keras.utils.image_dataset_from_directory(
         path,
-        image_size=(224, 224),
+        image_size=(256, 256),
         batch_size=batch_size,
         shuffle=False
     )
+
+    # shape B, H, W, C)
     dataset = dataset.map(lambda x, y: (preprocess_fn(x), y))
+
+    if debugging == True:
+        for img, label in dataset.take(1):
+            print("TF input shape:", img.shape)
+            print("TF input range:", tf.reduce_min(img), tf.reduce_max(img))
+
     dataset = dataset.take(batches)
     return dataset
 
-def run_inference_tensorflow(model, data, max_samples = 992):
+def run_inference(model, data, activations, activation_model, layer_map, debugging, max_samples = 992):
     print("TF: RUNNING TENSORFLOW INFERENCE WITH " + str(max_samples) + " SAMPLES.")
-    is_keras = isinstance(model, tf.keras.Model)
 
-    # handle activation grabbing
-    if is_keras:
-        tf_layer_map = {
-            "stage1": "conv2_block3_out",
-            "stage2": "conv3_block4_out",
-            "stage3": "conv4_block6_out",
-            "stage4": "conv5_block3_out",
-        }
-        # layer_names = ["conv2_block3_out", "conv3_block4_out", "conv4_block6_out", "conv5_block3_out"]
-        outputs = [model.get_layer(name).output for name in tf_layer_map.values()]
-        activation_model = activation_model = tf.keras.Model(inputs=model.input, outputs=outputs)
-        activations = {k: [] for k in tf_layer_map.keys()}
-    else:
-        activation_model = None
-        activations = None
-
-    # run inference
     all_outputs, all_labels = [], []
     processing_start_time = time.time()
 
     for images, labels in data:
-        if activation_model is not None:
-            layer_outputs = activation_model(images)  # list of tensors
+        layer_outputs = activation_model(images)  # list of tensors
 
-            for (stage, _), act in zip(tf_layer_map.items(), layer_outputs):
-                act = tf.reduce_mean(act, axis=[1, 2])
-                activations[stage].append(act.numpy())
-                # activations[stage].append(act.numpy())
+        for (stage, _), act in zip(layer_map.items(), layer_outputs):
+            if len(act.shape) == 4:
+                act = tf.reduce_mean(act, axis=[1, 2])  # (B, H, W, C) → (B, C)
+            elif len(act.shape) == 2:
+                pass  # already (B, C)
+            else:
+                raise ValueError("Unexpected activation shape")
+            activations[stage].append(act.numpy())
 
-        if is_keras:
-            preds = model(images)
-        else:
-            infer = model.signatures["serving_default"]
-            preds = list(infer(**{
-                list(infer.structured_input_signature[1].keys())[0]: images
-            }).values())[0]
+        preds = model(images)
 
         all_outputs.append(preds.numpy())
         all_labels.append(labels.numpy())
@@ -75,38 +78,43 @@ def run_inference_tensorflow(model, data, max_samples = 992):
     print(f"Processing time: {processing_time:.2f} seconds.")
 
     # collect inference activations and outputs
-    if activations is not None:
-        for k in activations:
-            activations[k] = np.concatenate(activations[k], axis=0)
+    for k in activations:
+        activations[k] = np.concatenate(activations[k], axis=0)
+
+    if debugging == True:
+        for name, act in activations.items():
+            print(f"TF {name} shape:", act.shape)
 
     all_outputs = np.concatenate(all_outputs, axis=0)
     all_labels = np.concatenate(all_labels, axis=0)
 
     return activations, all_outputs, all_labels, processing_time
 
-def run_cka_tensorflow(activations):
-    print("TF: RUNNING CKA.")
-    cka_start_time = time.time()
-    cka_matrix, layer_names = compute_cka_matrix_tensorflow(activations)
-    cka_end_time = time.time()
-    cka_duration = cka_end_time - cka_start_time
-    print(f"CKA time: {cka_duration:.2f} seconds.")
+def convert_numpy(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
 
-    return cka_matrix, layer_names, cka_duration
-
-def save_outputs_tensorflow(model, save_path, all_outputs, all_labels, cka_matrix, 
-                            layer_names, version_name, metadata):
+def save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging):
     print("TF: SAVING OUTPUTS.")
+
+    if debugging == True:
+        print("is softmax?")
+        print(np.sum(all_outputs[0]))
     probs = all_outputs
 
     # SAVE MODEL STATE
-    # XXX
+    model.save(save_path + "/model.keras")
     # SAVE MODEL STRUCTURE
     save_model_structure_tf(model, save_path)
 
     # ACCURACIES
     top1 = np.argmax(probs, axis=1)
-    top5 = np.argpartition(probs, -5, axis=1)[:, -5:]
+    top5 = np.argsort(probs, axis=1)[:, -5:][:, ::-1]
     top10 = np.argsort(probs, axis=1)[:, -10:][:, ::-1]
 
     top1_acc = np.mean(top1 == all_labels)
@@ -129,6 +137,7 @@ def save_outputs_tensorflow(model, save_path, all_outputs, all_labels, cka_matri
         "top5": float(top5_acc),
         "top10": float(top10_acc)
     }
+
     save_metrics(metrics, save_path)
 
     # CONFIDENCE
@@ -147,5 +156,110 @@ def save_outputs_tensorflow(model, save_path, all_outputs, all_labels, cka_matri
         save_path
     )
 
-    save_cka(cka_matrix, layer_names, save_path, version_name)
+    metadata = {k: convert_numpy(v) for k, v in metadata.items()}
     save_metadata(metadata, save_path)
+
+def register_activations_resnet(model):
+    layer_map = {
+        "stage1": "conv2_block3_out",
+        "stage2": "conv3_block4_out",
+        "stage3": "conv4_block6_out",
+        "stage4": "conv5_block3_out",
+        "stage5" : "avg_pool"
+    }
+    # layer_names = ["conv2_block3_out", "conv3_block4_out", "conv4_block6_out", "conv5_block3_out"]
+    outputs = [model.get_layer(name).output for name in layer_map.values()]
+    activation_model = tf.keras.Model(inputs=model.input, outputs=outputs)
+    activations = {k: [] for k in layer_map.keys()}
+    return activations, activation_model, layer_map
+
+def register_activations_mobilenet(model):
+    layer_map = {
+        "stage1": "block_2_add",
+        "stage2": "block_5_add",
+        "stage3": "block_12_add",
+        "stage4": "block_15_add",
+        "stage5": "out_relu"
+    }
+
+    outputs = [model.get_layer(name).output for name in layer_map.values()]
+    activation_model = tf.keras.Model(inputs=model.input, outputs=outputs)
+    activations = {k: [] for k in layer_map.keys()}
+    return activations, activation_model, layer_map
+
+def register_activations_vgg(model):
+    layer_map = {
+        "stage1": "block1_pool",
+        "stage2": "block2_pool",
+        "stage3": "block3_pool",
+        "stage4": "block4_pool",
+        "stage5": "block5_pool"
+    }
+
+    outputs = [model.get_layer(name).output for name in layer_map.values()]
+    activation_model = tf.keras.Model(inputs=model.input, outputs=outputs)
+    activations = {k: [] for k in layer_map.keys()}
+    return activations, activation_model, layer_map
+
+def tf_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, batch_size = 32):
+    print("RUNNING TF MOBILENETV2 PIPELINE.")
+    model = create_mobilenetv2()
+    data = get_data(dataset_path, preprocess_tf_mobilenet, max_samples, batch_size, model_name, debugging)
+    activations, activation_model, layer_map = register_activations_mobilenet(model)
+    activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)
+    total_params = model.count_params()
+    trainable_params = np.sum([v.numpy().size for v in model.trainable_weights])
+
+    metadata = {
+        "model": model_name,
+        "framework": "PyTorch",
+        "samples": max_samples,
+        "inference_time": inference_time,
+        "total_params": total_params,
+        "trainable_params": trainable_params
+    }
+
+    save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging)
+    return activations
+
+def tf_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, batch_size = 32):
+    print("RUNNING TF RESNET50 PIPELINE.")
+    model = create_resnet50()
+    data = get_data(dataset_path, preprocess_tf, max_samples, batch_size, model_name, debugging)
+    activations, activation_model, layer_map = register_activations_resnet(model)
+    activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)
+    total_params = model.count_params()
+    trainable_params = np.sum([v.numpy().size for v in model.trainable_weights])
+
+    metadata = {
+        "model": model_name,
+        "framework": "PyTorch",
+        "samples": max_samples,
+        "inference_time": inference_time,
+        "total_params": total_params,
+        "trainable_params": trainable_params
+    }
+
+    save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging)
+    return activations
+
+def tf_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, batch_size = 32):
+    print("RUNNING TF VGG16 PIPELINE.")
+    model = create_vgg16()
+    data = get_data(dataset_path, preprocess_tf, max_samples, batch_size, model_name, debugging)
+    activations, activation_model, layer_map = register_activations_vgg(model)
+    activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)
+    total_params = model.count_params()
+    trainable_params = np.sum([v.numpy().size for v in model.trainable_weights])
+
+    metadata = {
+        "model": model_name,
+        "framework": "PyTorch",
+        "samples": max_samples,
+        "inference_time": inference_time,
+        "total_params": total_params,
+        "trainable_params": trainable_params
+    }
+
+    save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging)
+    return activations

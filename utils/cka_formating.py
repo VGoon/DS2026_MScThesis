@@ -1,23 +1,40 @@
 import numpy as np
 from CKA import linear_CKA
 
-# def get_activation_pytorch(name, activations):
-#     def hook(module, input, output):
-#         activations.setdefault(name, []).append(output.detach())
-#     return hook
-def get_activation_pytorch(name, activations):
-    def hook(model, input, output):
-        # ✅ Global average pooling FIRST
-        act = output.mean(dim=[2, 3])  # (B, C, H, W) → (B, C)
+def get_activation_pytorch(stage_name, activations):
+    def hook(module, input, output):
+        # Global average pooling → (B, C)
+        act = output.mean(dim=[2, 3])
 
-        # ✅ Move to CPU immediately (important)
-        act = act.detach().cpu()
+        # Move to CPU + convert to numpy (consistent!)
+        act = act.detach().cpu().numpy()
 
-        if name not in activations:
-            activations[name] = []
+        if stage_name not in activations:
+            activations[stage_name] = []
 
-        activations[name].append(act)
+        activations[stage_name].append(act)
+
     return hook
+
+def register_mobilenet_hooks(model, activations):
+    handles = []
+
+    stage_map = {
+        "stage1": (0, 2),   # early conv
+        "stage2": (2, 4),
+        "stage3": (4, 7),
+        "stage4": (7, 18),
+    }
+
+    for stage, (start, end) in stage_map.items():
+        block = model.features[start:end]
+        handles.append(
+            block.register_forward_hook(
+                get_activation_pytorch_mobilenet(stage, activations)
+            )
+        )
+
+    return handles
 
 def reshape_for_cka_pytorch(tensor):
     tensor = tensor.mean(dim=[2, 3])
@@ -46,7 +63,6 @@ def compute_cka_matrix_pytorch(activations_dict):
             cka_matrix[i, j] = linear_CKA(X, Y)
 
     return cka_matrix, layers
-
 
 def reshape_for_cka_tensorflow(tensor):
     # tensor: (B, H, W, C)
@@ -117,15 +133,13 @@ def compute_cka_matrix(activations_dict):
     return cka_matrix, layers
 
 def compute_cross_cka(pt_activations, tf_activations):
-    stages = ["stage1", "stage2", "stage3", "stage4"]
-    cka_matrix = np.zeros((4, 4))
+    stages = ["stage1", "stage2", "stage3", "stage4", "stage5"]
+    cka_matrix = np.zeros((5, 5))
 
     for i, p in enumerate(stages):
         for j, t in enumerate(stages):
-            X = reshape_for_cka(pt_activations[p])
-            Y = reshape_for_cka(tf_activations[t])
-            # X = reshape_for_cka(pt_activations[p])
-            # Y = reshape_for_cka(tf_activations[t])
+            X = pt_activations[p]
+            Y = tf_activations[t]
 
             if X.shape[0] != Y.shape[0]:
                 cka_matrix[i, j] = np.nan
