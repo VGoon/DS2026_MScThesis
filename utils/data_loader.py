@@ -7,27 +7,27 @@ def compute_visuals(run_path, model_name):
     base = os.path.join(run_path, model_name)
     data = load_run(base)
 
-    top1_conf_py = data['predictions']['top1_conf']['py']
-    plot_confidence_distribution(base, top1_conf_py, model_name, "Pytorch")
-    top1_conf_tf = data['predictions']['top1_conf']['tf']
-    plot_confidence_distribution(base, top1_conf_tf, model_name, "Tensorflow")
+    # top1_conf_py = data['predictions']['top1_conf']['py']
+    # plot_confidence_distribution(base, top1_conf_py, model_name, "Pytorch")
+    # top1_conf_tf = data['predictions']['top1_conf']['tf']
+    # plot_confidence_distribution(base, top1_conf_tf, model_name, "Tensorflow")
 
     top1_py = data['predictions']['top1']['py']
     top1_tf = data['predictions']['top1']['tf']
     plot_prediction_agreement(top1_py, top1_tf, model_name)
 
-    plot_accuracy(base, data["metrics"]["py"], model_name, "Pytorch")
-    plot_accuracy(base, data["metrics"]["tf"], model_name, "Tensorflow")
+    # plot_accuracy(base, data["metrics"]["py"], model_name, "Pytorch")
+    # plot_accuracy(base, data["metrics"]["tf"], model_name, "Tensorflow")
 
-    labels = data['labels']
-    plot_confidence_correct_vs_wrong(base, top1_py, top1_conf_py, labels['py'], model_name, "Pytorch")
-    plot_confidence_correct_vs_wrong(base, top1_tf, top1_conf_tf, labels['tf'], model_name, "Tensorflow")
+    # labels = data['labels']
+    # plot_confidence_correct_vs_wrong(base, top1_py, top1_conf_py, labels['py'], model_name, "Pytorch")
+    # plot_confidence_correct_vs_wrong(base, top1_tf, top1_conf_tf, labels['tf'], model_name, "Tensorflow")
 
-    top5_conf_py = data['predictions']['top5_conf']['py']
-    plot_topk_confidence(base, top5_conf_py, model_name, "Pytorch")
+    # top5_conf_py = data['predictions']['top5_conf']['py']
+    # plot_topk_confidence(base, top5_conf_py, model_name, "Pytorch")
 
-    top5_conf_tf = data['predictions']['top5_conf']['tf']
-    plot_topk_confidence(base, top5_conf_tf, model_name, "Tensorflow")
+    # top5_conf_tf = data['predictions']['top5_conf']['tf']
+    # plot_topk_confidence(base, top5_conf_tf, model_name, "Tensorflow")
 
 def load_run(base):
     base_py = os.path.join(base, "pytorch/")

@@ -1,0 +1,8 @@
+{
+    "model": "VGG16",
+    "framework": "PyTorch",
+    "samples": 10976,
+    "inference_time": 846.4943039417267,
+    "total_params": 138357544,
+    "trainable_params": 138357544
+}

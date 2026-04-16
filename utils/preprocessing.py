@@ -40,6 +40,16 @@ def preprocess_tf(image):
 
     return image
 
+def preprocess_py_normalize(image):
+    # To numpy + normalize
+    image = np.array(image).astype(np.float32) / 255.0
+
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+
+    image = (image - mean) / std
+    return image
+
 def preprocess_py_resize_crop(image):
     # Resize (shorter side = 256)
     w, h = image.size
@@ -57,16 +67,6 @@ def preprocess_py_resize_crop(image):
     top = (new_h - 224) // 2
     image = image.crop((left, top, left + 224, top + 224))
 
-    return image
-
-def preprocess_py_normalize(image):
-    # To numpy + normalize
-    image = np.array(image).astype(np.float32) / 255.0
-
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-
-    image = (image - mean) / std
     return image
 
 def preprocess_tf_resize_crop(image):

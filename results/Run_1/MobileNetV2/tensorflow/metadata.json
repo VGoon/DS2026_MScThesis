@@ -1,8 +1,8 @@
 {
     "model": "MobileNetV2",
     "framework": "PyTorch",
-    "samples": 992,
-    "inference_time": 23.538098335266113,
+    "samples": 10976,
+    "inference_time": 251.47706985473633,
     "total_params": 3538984,
     "trainable_params": 3504872
 }

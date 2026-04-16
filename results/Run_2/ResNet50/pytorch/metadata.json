@@ -1,0 +1,8 @@
+{
+    "model": "ResNet50",
+    "framework": "PyTorch",
+    "samples": 10976,
+    "inference_time": 1235.7850229740143,
+    "total_params": 25557032,
+    "trainable_params": 25557032
+}

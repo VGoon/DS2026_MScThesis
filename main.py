@@ -11,7 +11,7 @@ print("START")
 
 dataset_path = "ImageNetSmall/"
 base_dir = f"results/"
-max_samples = 992
+max_samples = 10976#992
 batch_size = 32
 debugging = False
 
@@ -152,17 +152,17 @@ def run_vgg16(run_path):
     print("DONE.")
 
 def run():
-    # run_num = "Run_6/"
-    run_path, run_num = get_next_run_path(base_dir)
-    print("---------MOBILENET---------")
-    run_mobilenetv2(run_path)
+    run_num = "Run_1/"
+    # run_path, run_num = get_next_run_path(base_dir)
+    # print("---------MOBILENET---------")
+    # run_mobilenetv2(run_path)
     compute_visuals(base_dir +""+ run_num, "MobileNetV2/")
-    print("----------RESNET----------")
-    run_resnet50(run_path)
-    compute_visuals(base_dir +""+ run_num, "Resnet50/")
-    print("-----------VGG-----------")
-    run_vgg16(run_path)
-    compute_visuals(base_dir +""+ run_num, "VGG16/")
+    # print("----------RESNET----------")
+    # run_resnet50(run_path)
+    # compute_visuals(base_dir +""+ run_num, "Resnet50/")
+    # print("-----------VGG-----------")
+    # run_vgg16(run_path)
+    # compute_visuals(base_dir +""+ run_num, "VGG16/")
 
     print("DONE WITH PIPELINE.")
 
