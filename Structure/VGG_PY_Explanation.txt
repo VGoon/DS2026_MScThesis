@@ -1,0 +1,16 @@
+
+[Sequential] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Sequential.html#sequential 
+
+[Conv2d] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
+
+[ReLU] - https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU
+
+[MaxPool2d] - https://docs.pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d
+
+[AdaptiveAvgPool2d] - https://docs.pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool2d.html#torch.nn.AdaptiveAvgPool2d
+
+[Linear] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html#torch.nn.Linear
+
+[Dropout] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Dropout.html#torch.nn.Dropout
+
+https://docs.pytorch.org/vision/0.9/_modules/torchvision/models/vgg.html 

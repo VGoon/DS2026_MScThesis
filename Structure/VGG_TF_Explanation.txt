@@ -1,0 +1,9 @@
+[InputLayer] - https://keras.io/api/layers/core_layers/input/#input-function
+
+[Conv2D] - https://keras.io/api/layers/convolution_layers/convolution2d/
+
+[MaxPooling2D] - https://keras.io/api/layers/pooling_layers/max_pooling2d/
+
+[Flatten] - https://keras.io/api/layers/reshaping_layers/flatten/
+
+[Dense] - https://keras.io/api/layers/core_layers/dense/

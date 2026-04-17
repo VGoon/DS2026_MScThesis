@@ -2,41 +2,82 @@ import torch
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as mobilenet_preprocess
+from tensorflow.keras.applications.vgg16 import preprocess_input as vgg_preprocess
+from tensorflow.keras.applications.resnet50 import preprocess_input as resnet_preprocess
+from torchvision.models import mobilenet_v2, MobileNet_V2_Weights, ResNet50_Weights, VGG16_Weights
+# from torchvision.models import resnet50, ResNet50_Weights
+# from torchvision.models import vgg16, VGG16_Weights
 
 # “Although preprocessing differs across frameworks, this reflects the original training conditions of the models and is necessary to ensure valid inference behavior.”
 
 # --- PYTORCH ---
 # wants rgb and normalized with mean/std (0-1 scale)
-def preprocess_pytorch(image):
-    image = preprocess_py_resize_crop(image)
-    x = preprocess_py_normalize(image)
-    return torch.tensor(x, dtype=torch.float32).permute(2, 0, 1)
+def preprocess_pytorch(image, own_preprocessing, model_name):
+    if own_preprocessing == True:
+        image = preprocess_py_resize_crop(image)
+        image = preprocess_py_normalize(image)
+        image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)
+    else:
+        if model_name == "VGG16":
+            # print("VGG PREPROCESSING")
+            weights = VGG16_Weights.DEFAULT
+            transform = weights.transforms()
+            image = transform(image)
+        else:
+            # print("RESNET PREPROCESSING")
+            weights = ResNet50_Weights.DEFAULT
+            transform = weights.transforms()
+            image = transform(image)
+    return image
 
-def preprocess_py_mobilenet(image):
-    image = preprocess_py_resize_crop(image)
-    image = np.array(image).astype(np.float32)
-    image = (image / 127.5) - 1.0
-    return torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)
+def preprocess_py_mobilenet(image, own_preprocessing, model_name):
+    if own_preprocessing == True:
+        image = preprocess_py_resize_crop(image)
+        image = np.array(image).astype(np.float32)
+        image = (image / 127.5) - 1.0
+        image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)
+    else:
+        # print("MOBILE PREPROCESSING")
+        weights = MobileNet_V2_Weights.DEFAULT
+        transform = weights.transforms()
+        image = transform(image)
+
+    return image
 
 # scale [-1-1] for both pytorch and tf
-def preprocess_tf_mobilenet(image):
+def preprocess_tf_mobilenet(image, own_preprocessing, model_name):
     image = preprocess_tf_resize_crop(image)
-    image = tf.cast(image, tf.float32)
-    return (image / 127.5) - 1.0
+    if own_preprocessing == True:
+        image = tf.cast(image, tf.float32)
+        image = (image / 127.5) - 1.0
+    else:
+        # print("MOBILENET PREPROCESSING")
+        image = mobilenet_preprocess(image)
+    return image
 
 # --- TENSORFLOW ---
 # vgg and resnet
 # bgr, no std scaling, subtract pixel means (0-255 scale)
-def preprocess_tf(image):
+def preprocess_tf(image, own_preprocessing, model_name):
     image = preprocess_tf_resize_crop(image)
-    image = tf.cast(image, tf.float32)
 
-    # RGB → BGR
-    image = image[..., ::-1]
+    if own_preprocessing == True:
+        image = tf.cast(image, tf.float32)
 
-    # subtract ImageNet mean
-    mean = tf.constant([103.939, 116.779, 123.68])
-    image = image - mean
+        # RGB → BGR
+        image = image[..., ::-1]
+
+        # subtract ImageNet mean (scaled to 255) in BGR order
+        mean = tf.constant([103.939, 116.779, 123.68])
+        image = image - mean
+    else:
+        if model_name == "VGG16":
+            # print("VGG PREPROCESSING")
+            image = vgg_preprocess(image)
+        else:
+            # print("RESNET PREPROCESSING")
+            image = resnet_preprocess(image)
 
     return image
 
@@ -44,9 +85,11 @@ def preprocess_py_normalize(image):
     # To numpy + normalize
     image = np.array(image).astype(np.float32) / 255.0
 
+    # ImageNet mean and std scaled to [0-1]
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
 
+    # z-score normilization
     image = (image - mean) / std
     return image
 

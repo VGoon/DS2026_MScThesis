@@ -1,0 +1,73 @@
+https://docs.pytorch.org/docs/stable/nn.html#convolution-layers
+https://docs.pytorch.org/vision/main/_modules/torchvision/models/mobilenetv2.html 
+
+[Sequential] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Sequential.html#sequential 
+
+Modules will be added to it in the order they are passed in the constructor. Alternatively, an OrderedDict of modules can be passed in. 
+The forward() method of Sequential accepts any input and forwards it to the first module it contains. 
+It then “chains” outputs to inputs sequentially for each subsequent module, finally returning the output of the last module.
+The value a Sequential provides over manually calling a sequence of modules is that it allows treating the whole container as a single module, 
+such that performing a transformation on the Sequential applies to each of the modules it stores (which are each a registered submodule of the Sequential).
+
+[Conv2dNormActivation] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
+
+[BatchNorm2d] - https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html#torch.nn.BatchNorm2d
+
+[ReLU6] - https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU6.html#torch.nn.ReLU6
+
+[InvertedResidual]
+
+[Dropout] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Dropout.html#torch.nn.Dropout
+
+[Linear] - https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html#torch.nn.Linear
+
+
+
+
+# necessary for backwards compatibility
+class InvertedResidual(nn.Module):
+    def __init__(
+        self, inp: int, oup: int, stride: int, expand_ratio: int, norm_layer: Optional[Callable[..., nn.Module]] = None
+    ) -> None:
+        super().__init__()
+        self.stride = stride
+        if stride not in [1, 2]:
+            raise ValueError(f"stride should be 1 or 2 instead of {stride}")
+
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+
+        hidden_dim = int(round(inp * expand_ratio))
+        self.use_res_connect = self.stride == 1 and inp == oup
+
+        layers: list[nn.Module] = []
+        if expand_ratio != 1:
+            # pw
+            layers.append(
+                Conv2dNormActivation(inp, hidden_dim, kernel_size=1, norm_layer=norm_layer, activation_layer=nn.ReLU6)
+            )
+        layers.extend(
+            [
+                # dw
+                Conv2dNormActivation(
+                    hidden_dim,
+                    hidden_dim,
+                    stride=stride,
+                    groups=hidden_dim,
+                    norm_layer=norm_layer,
+                    activation_layer=nn.ReLU6,
+                ),
+                # pw-linear
+                nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+                norm_layer(oup),
+            ]
+        )
+        self.conv = nn.Sequential(*layers)
+        self.out_channels = oup
+        self._is_cn = stride > 1
+
+    def forward(self, x: Tensor) -> Tensor:
+        if self.use_res_connect:
+            return x + self.conv(x)
+        else:
+            return self.conv(x)

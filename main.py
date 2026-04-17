@@ -11,9 +11,10 @@ print("START")
 
 dataset_path = "ImageNetSmall/"
 base_dir = f"results/"
-max_samples = 10976#992
-batch_size = 32
+max_samples = 992#10976#992
+batch_size = 31
 debugging = False
+own_preprocessing = False
 
 def create_subdirectories(run_path, model_type):
     base = os.path.join(run_path, model_type)
@@ -81,9 +82,9 @@ def run_mobilenetv2(run_path):
     base, save_path_py, save_path_tf = create_subdirectories(run_path, model_name)
 
     # pytorch
-    py_activations = py_run_mobilenetv2(save_path_py, model_name, max_samples, dataset_path, debugging, batch_size)
+    py_activations = py_run_mobilenetv2(save_path_py, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
     # tensorflow
-    tf_activations = tf_run_mobilenetv2(save_path_tf, model_name, max_samples, dataset_path, debugging, batch_size)
+    tf_activations = tf_run_mobilenetv2(save_path_tf, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
 
     if debugging == True:
         for k in py_activations:
@@ -106,9 +107,9 @@ def run_resnet50(run_path):
     base, save_path_py, save_path_tf = create_subdirectories(run_path, model_name)
 
     # pytorch
-    py_activations = py_run_resnet50(save_path_py, model_name, max_samples, dataset_path, debugging, batch_size)
+    py_activations = py_run_resnet50(save_path_py, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
     # tensorflow
-    tf_activations = tf_run_resnet50(save_path_tf, model_name, max_samples, dataset_path, debugging, batch_size)
+    tf_activations = tf_run_resnet50(save_path_tf, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
 
     if debugging == True:
         for k in py_activations:
@@ -131,9 +132,9 @@ def run_vgg16(run_path):
     base, save_path_py, save_path_tf = create_subdirectories(run_path, model_name)
 
     # pytorch
-    py_activations = py_run_vgg16(save_path_py, model_name, max_samples, dataset_path, debugging, batch_size)
+    py_activations = py_run_vgg16(save_path_py, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
     # tensorflow
-    tf_activations = tf_run_vgg16(save_path_tf, model_name, max_samples, dataset_path, debugging, batch_size)
+    tf_activations = tf_run_vgg16(save_path_tf, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size)
 
     if debugging == True:
         for k in py_activations:
@@ -152,17 +153,17 @@ def run_vgg16(run_path):
     print("DONE.")
 
 def run():
-    run_num = "Run_1/"
-    # run_path, run_num = get_next_run_path(base_dir)
-    # print("---------MOBILENET---------")
-    # run_mobilenetv2(run_path)
+    # run_num = "Run_1/"
+    run_path, run_num = get_next_run_path(base_dir)
+    print("---------MOBILENET---------")
+    run_mobilenetv2(run_path)
     compute_visuals(base_dir +""+ run_num, "MobileNetV2/")
-    # print("----------RESNET----------")
-    # run_resnet50(run_path)
-    # compute_visuals(base_dir +""+ run_num, "Resnet50/")
-    # print("-----------VGG-----------")
-    # run_vgg16(run_path)
-    # compute_visuals(base_dir +""+ run_num, "VGG16/")
+    print("----------RESNET----------")
+    run_resnet50(run_path)
+    compute_visuals(base_dir +""+ run_num, "Resnet50/")
+    print("-----------VGG-----------")
+    run_vgg16(run_path)
+    compute_visuals(base_dir +""+ run_num, "VGG16/")
 
     print("DONE WITH PIPELINE.")
 

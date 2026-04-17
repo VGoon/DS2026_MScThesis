@@ -34,9 +34,15 @@ def create_vgg16():
     model.eval()
     return model
 
-def get_dataloader(path, preprocess_fn, debugging, batch_size=32):
+def get_dataloader(path, preprocess_fn, model_name, debugging, own_preprocessing, batch_size=32):
     print("PY: GETTING DATA LOADER.")
-    dataset = datasets.ImageFolder(path, transform=preprocess_fn)
+    # dataset = datasets.ImageFolder(path, transform=(preprocess_fn(own_preprocessing, model_name)))
+    
+    dataset = datasets.ImageFolder(
+        path,
+        transform=lambda img: preprocess_fn(img, own_preprocessing, model_name)
+    )
+    
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0)
     if debugging == True:
         for x, y in loader:
@@ -210,10 +216,10 @@ def register_hooks_vgg16(model):
 
     return activations, handles
 
-def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, batch_size):
+def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
     print("RUNNING PY MOBILENETV2 PIPELINE.")
     model = create_mobilenetv2()
-    data_loader = get_dataloader(dataset_path, preprocess_py_mobilenet, debugging, batch_size)
+    data_loader = get_dataloader(dataset_path, preprocess_py_mobilenet, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_mobilenet(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
     clean_hooks(handles)
@@ -232,10 +238,10 @@ def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debuggi
     save_outputs_pytorch(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, batch_size):
+def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
     print("RUNNING PY RESNET50 PIPELINE.")
     model = create_resnet50()
-    data_loader = get_dataloader(dataset_path, preprocess_pytorch, debugging, batch_size)
+    data_loader = get_dataloader(dataset_path, preprocess_pytorch, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_resnet50(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
     clean_hooks(handles)
@@ -254,10 +260,10 @@ def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging,
     save_outputs_pytorch(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def py_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, batch_size):
+def py_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
     print("RUNNING PY VGG16 PIPELINE.")
     model = create_vgg16()
-    data_loader = get_dataloader(dataset_path, preprocess_pytorch, debugging, batch_size)
+    data_loader = get_dataloader(dataset_path, preprocess_pytorch, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_vgg16(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
     clean_hooks(handles)

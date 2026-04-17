@@ -1,0 +1,17 @@
+[InputLayer] - https://keras.io/api/layers/core_layers/input/#input-function
+
+[InputLayer] - https://keras.io/api/layers/core_layers/input/#input-function
+
+[Conv2D] - https://keras.io/api/layers/convolution_layers/convolution2d/
+
+[BatchNormalization] - https://keras.io/api/layers/normalization_layers/batch_normalization/
+
+[Activation] - https://keras.io/api/layers/activations/
+
+[MaxPooling2D] - https://keras.io/api/layers/pooling_layers/max_pooling2d/
+
+[Add] - https://keras.io/api/layers/merging_layers/add/
+
+[GlobalAveragePooling2D] - https://keras.io/api/layers/pooling_layers/global_average_pooling2d/
+
+[Dense] - https://keras.io/api/layers/core_layers/dense/
