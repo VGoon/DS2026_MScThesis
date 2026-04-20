@@ -2,9 +2,11 @@
 /.vscode
 /__pycache__
 /ignore
+/ImageNetSmall_10Per
 /ImageNetSmall_own
 imagenet_subset.tar
 imagenet_subset.tar.gz
+imagenet_35_subset.tar.gz
 
 *.pt
 *.keras

@@ -18,3 +18,14 @@ https://keras.io/api/layers/base_layer/
 [GlobalAveragePooling2D] - https://keras.io/api/layers/pooling_layers/global_average_pooling2d/ 
 
 [Dense] - https://keras.io/api/layers/core_layers/dense/
+
+
+block_X_project = Linear bottleneck
+block_X_add = inverted residual
+
+full inverted residual block =
+- expand
+- depthwise
+- project
+- add
+

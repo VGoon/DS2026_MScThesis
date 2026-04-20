@@ -4,7 +4,7 @@ import shutil
 data_dir = "ImageNet/"
 output_dir = "ImageNetSmall/"
 
-IMAGES_PER_CLASS = 11
+IMAGES_PER_CLASS = 35
 
 classes = sorted(os.listdir(data_dir))
 

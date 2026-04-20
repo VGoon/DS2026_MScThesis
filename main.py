@@ -11,8 +11,8 @@ print("START")
 
 dataset_path = "ImageNetSmall/"
 base_dir = f"results/"
-max_samples = 992#10976#992
-batch_size = 31
+max_samples = 992#34976
+batch_size = 32
 debugging = False
 own_preprocessing = False
 
