@@ -201,9 +201,12 @@ def register_activations_vgg(model):
     activations = {k: [] for k in layer_map.keys()}
     return activations, activation_model, layer_map
 
-def tf_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size = 32):
+def tf_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size = 32):
     print("RUNNING TF MOBILENETV2 PIPELINE.")
-    model = create_mobilenetv2()
+    if runConverted == False:
+        model = create_mobilenetv2()
+    else:
+        model = None
     data = get_data(dataset_path, preprocess_tf_mobilenet, max_samples, batch_size, model_name, debugging, own_preprocessing)
     activations, activation_model, layer_map = register_activations_mobilenet(model)
     activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)
@@ -222,9 +225,12 @@ def tf_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debuggi
     save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def tf_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size = 32):
+def tf_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size = 32):
     print("RUNNING TF RESNET50 PIPELINE.")
-    model = create_resnet50()
+    if runConverted == False:
+        model = create_resnet50()
+    else:
+        model = None
     data = get_data(dataset_path, preprocess_tf, max_samples, batch_size, model_name, debugging, own_preprocessing)
     activations, activation_model, layer_map = register_activations_resnet(model)
     activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)
@@ -243,9 +249,12 @@ def tf_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging,
     save_outputs_tensorflow(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def tf_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size = 32):
+def tf_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size = 32):
     print("RUNNING TF VGG16 PIPELINE.")
-    model = create_vgg16()
+    if runConverted == False:
+        model = create_vgg16()
+    else:
+        model = None
     data = get_data(dataset_path, preprocess_tf, max_samples, batch_size, model_name, debugging, own_preprocessing)
     activations, activation_model, layer_map = register_activations_vgg(model)
     activations, all_outputs, all_labels, inference_time = run_inference(model, data, activations, activation_model, layer_map, debugging)

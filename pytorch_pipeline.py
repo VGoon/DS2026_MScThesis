@@ -216,9 +216,12 @@ def register_hooks_vgg16(model):
 
     return activations, handles
 
-def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
+def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size):
     print("RUNNING PY MOBILENETV2 PIPELINE.")
-    model = create_mobilenetv2()
+    if runConverted == False:
+        model = create_mobilenetv2()
+    else:
+        model = None
     data_loader = get_dataloader(dataset_path, preprocess_py_mobilenet, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_mobilenet(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
@@ -238,9 +241,12 @@ def py_run_mobilenetv2(save_path, model_name, max_samples, dataset_path, debuggi
     save_outputs_pytorch(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
+def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size):
     print("RUNNING PY RESNET50 PIPELINE.")
-    model = create_resnet50()
+    if runConverted == False:
+        model = create_resnet50()
+    else:
+        model = None
     data_loader = get_dataloader(dataset_path, preprocess_pytorch, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_resnet50(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
@@ -260,9 +266,12 @@ def py_run_resnet50(save_path, model_name, max_samples, dataset_path, debugging,
     save_outputs_pytorch(model, save_path, all_outputs, all_labels, metadata, debugging)
     return activations
 
-def py_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, batch_size):
+def py_run_vgg16(save_path, model_name, max_samples, dataset_path, debugging, own_preprocessing, runConverted, batch_size):
     print("RUNNING PY VGG16 PIPELINE.")
-    model = create_vgg16()
+    if runConverted == False:
+        model = create_vgg16()
+    else:
+        model = None
     data_loader = get_dataloader(dataset_path, preprocess_pytorch, model_name, debugging, own_preprocessing, batch_size)
     activations, handles = register_hooks_vgg16(model)
     all_outputs, all_labels, activations, inference_time = run_inference(model_name, model, data_loader, activations, debugging, max_samples)
