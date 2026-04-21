@@ -167,49 +167,26 @@ def run():
 
     print("DONE WITH PIPELINE.")
 
+# from conversion_pipeline import export_pytorch_to_onnx, convert_onnx_to_tf
 # def run():
-#     frameworks = ['pytorch', 'tensorflow']
-    
-#     # run pytorch
-#     save_path_base_py, save_path_converted_py = create_subdirectories(run_path, "pytorch_baseline", "pt_to_tf_converted")
-#     py_activations = run_pytorch(save_path_base_py)
-#     # converted_tf_model = run_converted_base_pytorch(save_path_converted_py)
-
-#     data = get_data_tf(dataset_path, preprocess_tf, max_samples, batch_size)
-
-#     activations_tf, all_outputs, all_labels, inference_time = run_inference_tensorflow(converted_tf_model, data, max_samples)
-#     cka_matrix, layers, cka_duration = run_cka_tensorflow(activations_tf)
+#   export_pytorch_to_onnx()
+#   mobile_name = "/content/DS2026_MScThesis/Converted_Models/PY_Mobilenet_model.onnx"
+#   resnet_name = "/content/DS2026_MScThesis/Converted_Models/PY_Resnet_model.onnx"
+#   vgg_name = "/content/DS2026_MScThesis/Converted_Models/PY_VGG_model.onnx"
+#   convert_onnx_to_tf(mobile_name, "Converted_PY_Mobilenet_to_TF")
+#   convert_onnx_to_tf(resnet_name, "Converted_PY_Resnet_to_TF")
+#   convert_onnx_to_tf(vgg_name, "Converted_PY_VGG_to_TF")
 
 
-#     # total_params = converted_tf_model.count_params()
-#     # trainable_params = int(np.sum([ np.prod(v.shape) for v in converted_tf_model.trainable_weights]))
-    
-#     metadata = {
-#         "model": "ResNet18",
-#         "framework": "PyTorch",
-#         "type": "baseline",
-#         "samples": max_samples,
-#         "inference_time": inference_time,
-#         "cka_time": cka_duration,
-#         # "total_params": total_params,
-#         # "trainable_params": trainable_params
-#     }
+# from conversion_pipeline import export_tensorflow_to_onnx, convert_onnx_to_py
+# def run():
+#   # export_tensorflow_to_onnx()
+#   mobile_name = "/content/DS2026_MScThesis/Converted_Models_TF/TF_Mobilenet_model.onnx"
+#   resnet_name = "/content/DS2026_MScThesis/Converted_Models_TF/TF_Resnet_model.onnx"
+#   # vgg_name = "/content/DS2026_MScThesis/Converted_Models_TF/TF_VGG_model.onnx"
+#   convert_onnx_to_py(mobile_name, "/content/DS2026_MScThesis/Converted_Models_TF/Converted_TF_Mobilenet_to_PY.pth")
+#   convert_onnx_to_py(resnet_name, "/content/DS2026_MScThesis/Converted_Models_TF/Converted_TF_Resnet_to_PY.pth")
+#   # convert_onnx_to_py(vgg_name, "Converted_TF_VGG_to_PY")
 
-#     save_outputs_tensorflow(model, save_path_converted_py, all_outputs, all_labels, cka_matrix, layers, "PyTorch2TF Conversion", metadata)
-
-
-
-
-#     # run tensorflow
-#     save_path_base_tf, save_path_converted_tf = create_subdirectories(run_path, "tensorflow_baseline", "tf_to_pt_converted")
-#     tf_activations = run_tensorflow(save_path_base_tf)
-#     # run_converted_tensorflow(save_path_converted_tf)
-
-#     # run cka on both tf and py
-#     print("COMPUTING CKA FOR BOTH.")
-#     cka_matrix, stages = compute_cross_cka(py_activations, tf_activations)
-#     save_cka(cka_matrix, stages, run_path, "PT_vs_TF")
-
-#     print("DONE.")
 
 run()
